@@ -16,24 +16,43 @@ const registerUser = asyncHandler(async(req,res)=>{
 
   const{fullname,email,username,password} = req.body
   console.log("email:",email);
-  if ([
+  console.log("fullname:",fullname);
+  console.log("username:",username);
+  console.log("password:",password);
+  
+  if ([ 
     fullname,email,username,password
   ].some((sam)=>sam?.trim()==="")) {
     throw new apiError(400,"all field are required")
     
   } 
-  const exitedUser = User.find({
+  const exitedUser = await User.findOne({
     $or:[{username},{email}]
   })
   if (exitedUser) {
     throw new apiError(409,"user already logedin")
   }
-  const avatarLocalpath = req.files?.avatar[0]?.path;
-const coverImageLocalpath = req.files?.coverImage[0]?.path; 
-if (!avatarLocalpath) {
+
+  //console.log(req.files);
   
-} 
+  const avatarLocalpath = req.files?.avatar?.[0]?.path;
+  if (!avatarLocalpath) {
+    throw new apiError(400, "Avatar image is required.");
+  }
+    //console.log("Avatar Local Path:", avatarLocalpath);
+
+
+  let coverImageLocalpath;
+  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0) {
+    coverImageLocalpath = req.files.coverImage[0].
+    path
+    
+  }
+
+
 const avatar = await uploadOnCloudinary(avatarLocalpath)
+//console.log(avatar);
+
 const coverImage = await uploadOnCloudinary(coverImageLocalpath)
 
 if (!avatar) {
@@ -48,8 +67,11 @@ if (!avatar) {
     username
   })
 const createdUser = await   User.findById(user._id).select(
-  "-password - refreshToken"
+  "-password -refreshToken"
+ 
+  
 )
+
   if (!createdUser) {
     throw new apiError(500,"something went wrong")
   }
