@@ -177,7 +177,7 @@ try {
     if (!user) {
       throw new apiError(401,"invalid refresh token")
     }
-    if (incomingRefreshtoken !== user?.refreshToken) {
+    if (!incomingRefreshtoken !== user?.refreshToken) {
       throw new apiError(401,"Refresh token is used and expired")
   
     }
@@ -187,7 +187,7 @@ try {
     }
     const {accessToken,newRefreshToken}=await generateAccessAndRefreshToken(user._id)
     return res.status(200).cookie('accessToken',accessToken,options).
-    cookie('refreshToken',newRefreshTokenrefreshToken,options).
+    cookie('refreshToken',newRefreshToken,options).
     json(
       new apiResponse(200,
         {accessToken,newRefreshToken},
